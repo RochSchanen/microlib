@@ -12,6 +12,4 @@
     #include "./microlib_SSD1306/microlib_SSD1306.h"
     #include "./microlib_DsB/microlib_DsB.h"
 
-//  #include "./microlib_166/microlib_166.h"
-
 #endif
