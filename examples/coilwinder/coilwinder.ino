@@ -1,11 +1,8 @@
-//  coilwinder.ino
+//  testmicrolib.ino
 
 #include <microlib.h>
 
-// todo:
-// continuous selection of the wire size with stop
-// adjust spool substep value
-// adjust spool min and max rpm
+// todo: continuous selection of the wire size with stop                !!!
 
 ////////////////////////
 //// GENERAL MACROS ////
@@ -37,7 +34,7 @@ void strcpy(char *dest, char *sour){
 //// PIN DEFINITIONS ////
 /////////////////////////
 
-// SM0: STEPPER MOTOR 0 (bottom connector)
+// SM0: STEPPER MOTOR 0 (FIND CONNECTOR)                                !!!
 // PWMs are pins 2 and 3 (timer counter #3)
 // digital pins are 22, 23, 24, 25 (port A)
 // coil A: 3, 22, 23 (PWM, +, -)
@@ -49,7 +46,7 @@ void strcpy(char *dest, char *sour){
 #define SM0_INB1 24
 #define SM0_INB2 25
 
-// SM1: STEPPER MOTOR 1 (middle connector)
+// SM1: STEPPER MOTOR 1 (FIND CONNECTOR)                                !!!
 // PWMs are pins 6 and 7 (timer counter #4)
 // digital pins are 26, 27, 28, 29 (port A)
 // coil A: 7, 26, 27 (PWM, +, -)
@@ -61,7 +58,7 @@ void strcpy(char *dest, char *sour){
 #define SM1_INB1 28
 #define SM1_INB2 29
 
-// SM2: STEPPER MOTOR 2 (top connector)
+// SM2: STEPPER MOTOR 2 (FIND CONNECTOR)                                !!!
 // PWMs are pins 44 and 45 (timer counter #5)
 // digital pins are 30, 31, 32, 33 (port C)
 // coil A: 44, 30, 31 (PWM, +, -)
@@ -73,21 +70,22 @@ void strcpy(char *dest, char *sour){
 #define SM2_INB1 32
 #define SM2_INB2 33
 
-// IE0: INCREMENTAL ENCODER 0 (bottom connector)
+// unused
+// IE0: INCREMENTAL ENCODER 0 (FIND CONNECTOR)                          !!!
 // A: 40, B: 41 (port G bit 0, 1)
 // I: 14 (port J bit 0)
 #define IE0_A 40
 #define IE0_B 41
 #define IE0_I 14
 
-// IE1: INCREMENTAL ENCODER 1 (top connector)
+// IE1: INCREMENTAL ENCODER 1 (FIND CONNECTOR)                          !!!
 // A: 48, B: 49 (port L bit 0, 1)
 // I: 15 (port J bit 1)
 #define IE1_A 48
 #define IE1_B 49
 #define IE1_I 15
 
-// IE2: INCREMENTAL ENCODER 2 (handheld box)
+// IE2: INCREMENTAL ENCODER 2 (FIND CONNECTOR)                          !!!
 // A: 16, B: 17 (port H bit 0, 1)
 // I: 39 (port G bit 2)
 #define IE2_A 16
@@ -101,19 +99,19 @@ void strcpy(char *dest, char *sour){
 #define BT_UP 36 // Front Toggle Switch "(on)-off-(on)"
 #define BT_DN 37 // Front Toggle Switch "(on)-off-(on)"
 
-/////////////////////////////
-//// DEVICES DECLARATION ////
-/////////////////////////////
+//////////////////////////////
+//// DEVICES DECLARATIONS ////
+//////////////////////////////
 
 // stepper motors instance
 microlib_StM sm_coil;
 microlib_StM sm_carriage;
 microlib_StM sm_spool;
 
-// incremental encoders and trigger signals
-microlib_IEc ie_knob;  microlib_Btn bt_kn; // knob stop
-microlib_IEc ie_spool; microlib_Btn bt_sr; // spool zero reset
-microlib_IEc ie_coil;  microlib_Btn bt_cr; // full turn trigger
+// incremental encoders with buttons or zero trigger
+microlib_IEc ie_knob;  microlib_Btn bt_kn; // (push)
+microlib_IEc ie_spool; microlib_Btn bt_sr; // (trigger)
+microlib_IEc ie_coil;  microlib_Btn bt_cr; // (trigger)                 !!!
 
 // buttons and switch
 microlib_Btn bt_up; // toggle switch select up
@@ -168,22 +166,37 @@ void clear(void){
 //// STATE VARIABLES ////
 /////////////////////////
 
-int16_t ie_knob_v;      // knob value  [steps]
-int16_t ie_spool_v;     // spool value [steps]
-int16_t ie_coil_v;      // coil value  [steps]
-int32_t sm_carriage_v;  // carriage motor position value  [sub steps]
-int32_t sm_coil_v;      // coil motor position value      [sub steps]
-int32_t interval_v;     // interval value
+int16_t ie_knob_v;      // knob value               [steps] user control
+int16_t ie_spool_v;     // spool value              [steps] balance
+int16_t ie_coil_v;      // coil value               [steps]
+
+int32_t sm_carriage_v;  // carriage motor position  [sub steps]
 int8_t dir_v;           // direction value
-uint8_t alarm_f;        // spool flag
-uint16_t wire_v;        // wire size value    [0.1 um]
-float Counter_o;        // counter offset     [sub steps]
-float Position_o;       // position offset    [micrometers]
-float Counter_ref;      // counter reference  [sub steps]
-float Position_ref;     // position reference [micrometers]
-float Position_target;  //                    [sub steps]
+
+int32_t sm_coil_v;      // coil motor position      [sub steps]
+
+
+uint8_t alarm_f;        // alarm flag (SPOOL UNRESOLVED ORIGIN)
+
+uint16_t wire_v;        // wire size value          [0.1 um]
+
+float Counter_o;        // counter offset           [sub steps]
+float Position_o;       // position offset          [micrometers]
+
+float Counter_ref;      // counter reference        [sub steps]
+float Position_ref;     // position reference       [micrometers]
+
+float Position_target;  //                          [sub steps]
+
 uint32_t CurrentState;  // Current Machine State
 uint32_t InitState;     // Init trigger flag
+
+
+/////////////////////////
+//// TEMP. VARIABLES ////
+/////////////////////////
+
+int32_t interval_v;     // interval value
 
 //////////////////////////////////////////////////
 //// HARDWARE SPECIFIC DEFINITIONS AND MACROS ////
@@ -196,14 +209,19 @@ uint32_t InitState;     // Init trigger flag
 // 1 substep = 0.0625 step = 0.0003125 turn = 1.5625 um
 // 0.1 turn = 20 steps = 320 substeps = 2^6*5 substeps
 
-#define SUBSTEPSIZE 2
-#define SPOOL_MAX 28
-#define SPOOL_MIN 2
 #define WIRE(x) ((float)x / 10.0)
-#define COUNTER(x) ((float)x / 200.0 / 16.0)
-// #define COUNTER(x) ((float)x / 500.0)
+
+#define COUNTER(x) ((float)x / 200.0 / 16.0) // motor step integration
+// #define COUNTER(x) ((float)x / 500.0) // for incremental encoder     !!!
+
 #define POSITION(x) ((float)x * 5000.0 / 200.0 / 16.0)
+
+#define SUBSTEPSIZE 2 // push this to the code start
 #define RPM(x)((float)(1000000L * 60 * SUBSTEPSIZE / 16 / 200) / (float)x )
+
+// this requires some cleanup
+#define SPOOL_MIN 2
+#define SPOOL_MAX 28
 #define SPOOL(x) (1800.0 * (float)(SPOOL_MAX - SPOOL_MIN) / ((float)abs(x) - (float)SPOOL_MIN))
 
 /////////////////////
@@ -211,11 +229,11 @@ uint32_t InitState;     // Init trigger flag
 /////////////////////
 
 #define ALARM_SPOL (1<<0) // SPOOL UNREFERENCED
-#define ALARM_USER (1<<1) // USER TRIGGERED
-#define ALARM_ARML (1<<2) // ARM TOO LOW
-#define ALARM_ARMH (1<<3) // ARM TOO HIGH
-#define ALARM_CARL (1<<4) // CARRIAGE LEFT LIMIT REACHED
-#define ALARM_CARR (1<<5) // CARRIAGE RIGHT LIMIT REACHED
+//#define ALARM_USER (1<<1) // USER TRIGGERED                           !!!
+//#define ALARM_ARML (1<<2) // ARM TOO LOW                              !!!
+//#define ALARM_ARMH (1<<3) // ARM TOO HIGH                             !!!
+//#define ALARM_CARL (1<<4) // CARRIAGE LEFT LIMIT REACHED              !!!
+//#define ALARM_CARR (1<<5) // CARRIAGE RIGHT LIMIT REACHED             !!!
 
 /////////////////////////////
 //// MACHINE STATE CODES ////
@@ -228,6 +246,7 @@ uint32_t InitState;     // Init trigger flag
 #define STATE_CARR_ONLY 4
 #define STATE_CARR_STEP 5
 #define STATE_WIRE_STEP 6
+// todo: continuous selection of the wire size together with a stop     !!!
 
 ///////////////
 //// SETUP ////
@@ -238,29 +257,36 @@ void setup() {
     // Serial.begin(9600);
     // Serial.write("starting...\n");
 
+    // setup encoders
+
     pinMode(IE0_A, INPUT_PULLUP);
     pinMode(IE0_B, INPUT_PULLUP);
     ie_spool.setup(1, 0, PING); // to generalise
-    ie_spool.set(0, 0, 1);
+    // ie_spool.set(0, 0, 1);
+    ie_spool.set(0, -28, +28);
 
     pinMode(IE1_A, INPUT_PULLUP);
     pinMode(IE1_B, INPUT_PULLUP);
     ie_coil.setup(1, 0, PINL);  // to generalise
-    ie_coil.set(0, 0, 1);
+    // ie_coil.set(0, 0, 1);
+    ie_coil.set(0, -(1L<<30), +(1L<<30));
 
-    // hand held box
     pinMode(IE2_A, INPUT_PULLUP);
     pinMode(IE2_B, INPUT_PULLUP);
     ie_knob.setup(1, 0, PINH);  // to generalise
     ie_knob.set(0, 0, 1);
 
-    bt_al.setup(BT_RE); // alarm
+    // setup buttons and encoder buttons and encoder triggers
+
+    bt_al.setup(BT_RE); // emergency stop button
     bt_up.setup(BT_UP); // select up
     bt_dn.setup(BT_DN); // select down
     bt_dr.setup(BT_DR); // direction
-    bt_cr.setup(IE0_I); // counter reset
-    bt_sr.setup(IE1_I); // spool reset
-    bt_kn.setup(IE2_I); // knob reset
+    bt_cr.setup(IE0_I); // counter origin trigger                       !!!
+    bt_sr.setup(IE1_I); // spool origin trigger
+    bt_kn.setup(IE2_I); // knob button
+
+    // setup motors
 
     cbi(TCCR3B, CS31); // increase pwm frequency: counter #3
     cbi(TCCR4B, CS41); // increase pwm frequency: counter #4
@@ -273,9 +299,12 @@ void setup() {
     sm_coil.setup(      SM2_PWMA, SM2_INA1, SM2_INA2,
                         SM2_PWMB, SM2_INB1, SM2_INB2);
 
-    dsp.setup(&bus, 0x3C);
+    // setup display ssd1306
 
+    dsp.setup(&bus, 0x3C);
     clear();
+
+    // setup display buffers
 
     db_position_stat.setup(&dsp, sb_position_stat, 0, 1);
     db_wiresize_stat.setup(&dsp, sb_wiresize_stat, 0, 2);
@@ -287,30 +316,40 @@ void setup() {
     db_rpm.setup(&dsp, sb_rpm, 6, 3);
     db_dir.setup(&dsp, sb_dir, 3, 3);
 
+    // record motors state
+
     sm_carriage_v = sm_carriage.getpos();
     sm_coil_v = sm_coil.getpos();
+
+    // record encoders state
 
     ie_spool_v = ie_spool.get();
     ie_knob_v = ie_knob.get();
     ie_coil_v = ie_coil.get();
 
-    ie_spool.set(0, -28, +28);
-    ie_coil.set(0, -(1L<<30), +(1L<<30));
+    // set default values
 
     dir_v = +1;
     wire_v = 2500;
     Counter_o = 0;
     Position_o = 0;
-    Counter_ref = COUNTER(sm_coil_v);
-    Position_ref = POSITION(sm_carriage_v);
     alarm_f = ALARM_SPOL;
     CurrentState = STATE_ALARM;
     InitState = 1;
+
+    // compute references
+
+    Counter_ref = COUNTER(sm_coil_v);
+    Position_ref = POSITION(sm_carriage_v);
+
+    // push text to display through display buffers
 
     dtostrf(COUNTER(sm_coil_v) - Counter_o, 9, 1, sb_counter);
     dtostrf(POSITION(sm_carriage_v) - Position_o, 9, 1, sb_position);
     dtostrf(WIRE(wire_v), 5, 1, sb_wiresize);
     dtostrf(0.0, 5, 1, sb_rpm);
+
+    // push permanent text to display
 
     strcpy(sb_tmp," ~m"); dsp.putString(11, 1, sb_tmp);
     while(!dsp.ready()){bus.updt(); dsp.updt();}
@@ -319,7 +358,13 @@ void setup() {
     strcpy(sb_tmp,"rpm"); dsp.putString(12, 3, sb_tmp);
     while(!dsp.ready()){bus.updt(); dsp.updt();}
 
+    // setup done
     return;}
+
+////////////////////////
+//// MORE FUNCTIONS ////
+////////////////////////
+
 
 uint8_t SelectorUpdate(int8_t Current){
     if(bt_up.pressed()) Current -= 1;
@@ -329,45 +374,49 @@ uint8_t SelectorUpdate(int8_t Current){
     if(alarm_f) Current = STATE_ALARM;
     return Current;}
 
+///////////////////
+//// MAIN LOOP ////
+///////////////////
+
 void loop(){
 
     int32_t Current_Value;
 
-    /********** update I/O **********/
+    // DEVICES UPDATES
 
-        /*** display ***/
-        db_wiresize_stat.updt();
-        db_position_stat.updt();
-        db_counter_stat.updt();
-        db_position.updt();
-        db_wiresize.updt();
-        db_counter.updt();
-        db_rpm.updt();
-        db_alarm.updt();
-        db_dir.updt();
-        dsp.updt();
-        bus.updt();
+    // display
+    db_wiresize_stat.updt();
+    db_position_stat.updt();
+    db_counter_stat.updt();
+    db_position.updt();
+    db_wiresize.updt();
+    db_counter.updt();
+    db_rpm.updt();
+    db_alarm.updt();
+    db_dir.updt();
+    dsp.updt();
+    bus.updt();
 
-        /*** buttons ***/
-        bt_kn.updt();
-        bt_up.updt();
-        bt_dn.updt();
-        bt_dr.updt();
-        bt_sr.updt();
-        bt_al.updt();
-        bt_cr.updt();
+    // buttons
+    bt_kn.updt();
+    bt_up.updt();
+    bt_dn.updt();
+    bt_dr.updt();
+    bt_sr.updt();
+    bt_al.updt();
+    bt_cr.updt();
 
-        /*** incremental encoders ***/
-        ie_spool.updt(PINL);    // to generalise
-        ie_knob.updt(PINH);     // to generalise
-        ie_coil.updt(PING);     // to generalise
+    // incremental encoders
+    ie_spool.updt(PINL);    // to generalise
+    ie_knob.updt(PINH);     // to generalise
+    ie_coil.updt(PING);     // to generalise
 
-        /*** motors ***/
-        sm_carriage.updt();
-        sm_spool.updt();
-        sm_coil.updt();
+    // motors
+    sm_carriage.updt();
+    sm_spool.updt();
+    sm_coil.updt();
 
-    /********** update machine state **********/
+    // UPDATE MAIN STATE
 
     switch(CurrentState){
 
@@ -469,6 +518,7 @@ void loop(){
 
             if(CurrentState == STATE_COIL_ONLY){
 
+                // update RPM
                 Current_Value = ie_knob.get();
                 if(ie_knob_v != Current_Value){
                     if(Current_Value == 0){
@@ -614,15 +664,15 @@ void loop(){
             else sm_spool.hold();
             ie_spool_v = Current_Value;}}
 
-    Current_Value = sm_coil.getpos();
-    if(sm_coil_v != Current_Value){
-        dtostrf(COUNTER(Current_Value)-Counter_o, 9, 1, sb_counter);
-        sm_coil_v = Current_Value;}
-
     // Current_Value = ie_coil.get();
     // if(ie_coil_v != Current_Value){
     //  dtostrf(COUNTER(Current_Value), 9, 1, sb_counter);
     //  ie_coil_v = Current_Value;}
+
+    Current_Value = sm_coil.getpos();
+    if(sm_coil_v != Current_Value){
+        dtostrf(COUNTER(Current_Value)-Counter_o, 9, 1, sb_counter);
+        sm_coil_v = Current_Value;}
 
     Current_Value = sm_carriage.getpos();
     if(sm_carriage_v != Current_Value){
