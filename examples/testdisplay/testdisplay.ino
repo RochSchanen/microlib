@@ -18,14 +18,6 @@ void clear(void){
         }
     return;}
 
-// string copy function
-void strcpy(char *dest, char *sour){
-    uint8_t i;
-    i = 0;
-    while(*(sour+i)>'\0') *(dest+i)=*(sour+i);
-    *(dest+i)='\0';
-    return;}
-
 void setup() {
 
     // setup display ssd1306

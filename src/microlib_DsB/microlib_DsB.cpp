@@ -31,7 +31,9 @@ void microlib_DSB::updt(void){
             if(d->ready()){ // check is the display is ready for xfer
                 // COPY DISPLAY BUFFER STRING TO XFER BUFFER STRING
                 k = 0;
-                while(s[k] > 0) b[k] = s[k++];
+                while(s[k] > 0){
+                    b[k] = s[k];
+                    k++;}
                 b[k] = s[k]; // don't forget the end-of-string char
                 // CLEAR DISPLAY BUFFER STRING
                 s[0] = '\0';
@@ -40,7 +42,7 @@ void microlib_DSB::updt(void){
                 // increment "running" id
                 i++;
                 // cycle through the display buffer stack
-                if(i == n) i = 0; // could have used a modulo operator
+                if(i == n) i = 0; // use modulo operator instead?
             }
         }else{ // tested buffer is empty, check the next one
             // increment "running" id

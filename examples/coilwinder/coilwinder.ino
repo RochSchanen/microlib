@@ -18,18 +18,6 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |=  _BV(bit))
 #endif
 
-///////////////////////////
-//// GENERAL FUNCTIONS ////
-///////////////////////////
-
-// general string copy function
-void strcpy(char *dest, char *sour){
-    uint8_t i;
-    i = 0;
-    while(*(sour+i)>'\0') *(dest+i)=*(sour+i);
-    *(dest+i)='\0';
-    return;}
-
 /////////////////////////
 //// PIN DEFINITIONS ////
 /////////////////////////

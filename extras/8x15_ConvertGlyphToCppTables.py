@@ -7,15 +7,15 @@ into C++ code
 
 from __future__ import print_function
 
-print("const uint8_t uL_SSD1306::fu[][8] PROGMEM = {");
+print("const uint8_t microlib_SSD1306::fu[][8] PROGMEM = {");
 
 n = None;
 
 file = open("./8x15_.txt", "r");
 
 for line in file:
-    
-    if line.find("GLYPH") == 0: 
+
+    if line.find("GLYPH") == 0:
         i = 0;
         Bytes = [0]*8;
         n = int(line[6:10], 16);
@@ -28,9 +28,9 @@ for line in file:
             if j<7: print(', ', end='');
         print('},');
         n = None;
-    
-#    elif n == 1: break;        
-    
+
+#    elif n == 1: break;
+
     elif not n == None:
         if len(line)>8:
             if i<8:
@@ -45,19 +45,19 @@ for line in file:
 
 file.close();
 print("};");
-print("remove last coma manually");
+print("// remove last coma manually");
 
 print();
 
-print("const uint8_t uL_SSD1306::fl[][8] PROGMEM = {");
+print("const uint8_t microlib_SSD1306::fl[][8] PROGMEM = {");
 
 n = None;
 
 file = open("./8x15_.txt", "r");
 
 for line in file:
-    
-    if line.find("GLYPH") == 0: 
+
+    if line.find("GLYPH") == 0:
         i = 0;
         Bytes = [0]*8;
         n = int(line[6:10], 16);
@@ -70,9 +70,9 @@ for line in file:
             if j<7: print(', ', end='');
         print('},');
         n = None;
-    
-#    elif n == 1: break;        
-    
+
+#    elif n == 1: break;
+
     elif not n == None:
         if len(line)>8:
             if i>7:
@@ -87,11 +87,11 @@ for line in file:
 
 file.close();
 print("};");
-print("remove last coma manually");
+print("// remove last coma manually");
 
 print();
 
-print("const uint8_t uL_SSD1306::lu[] PROGMEM = {");
+print("const uint8_t microlib_SSD1306::lu[] PROGMEM = {");
 
 n = None;
 
@@ -102,12 +102,12 @@ k = 0;
 lu = [0]*96;
 
 for line in file:
-    
-    if line.find("GLYPH") == 0: 
+
+    if line.find("GLYPH") == 0:
         n = int(line[6:10], 16)-32;
         lu[n] = k;
         k += 1;
-    
+
 file.close();
 
 for j in range(12):
@@ -119,4 +119,4 @@ for j in range(12):
     print();
 
 print("};");
-print("remove last coma manually");
+print("// remove last coma manually");
