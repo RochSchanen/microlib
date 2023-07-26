@@ -284,8 +284,10 @@ void setup() {
                         SM0_PWMB, SM0_INB1, SM0_INB2);
     sm_carriage.setup(  SM1_PWMA, SM1_INA2, SM1_INA1,
                         SM1_PWMB, SM1_INB1, SM1_INB2);
-    sm_coil.setup(      SM2_PWMA, SM2_INA1, SM2_INA2,
-                        SM2_PWMB, SM2_INB1, SM2_INB2);
+    //~ sm_coil.setup(      SM2_PWMA, SM2_INA1, SM2_INA2,
+                        //~ SM2_PWMB, SM2_INB1, SM2_INB2);
+    sm_coil.setup(      SM2_PWMB, SM2_INB1, SM2_INB2,
+                        SM2_PWMA, SM2_INA1, SM2_INA2);
 
     // setup display ssd1306
 
@@ -648,7 +650,7 @@ void loop(){
             if(Current_Value < -SPOOL_MIN){
                 interval_v = SPOOL(-Current_Value);
                 sm_spool.reverse();}
-            if(interval_v) sm_spool.interval(interval_v, 8);
+            if(interval_v) sm_spool.interval(interval_v, 1);
             else sm_spool.hold();
             ie_spool_v = Current_Value;}}
 
