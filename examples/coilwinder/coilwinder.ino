@@ -416,7 +416,7 @@ void loop(){
 
                 // Serial.write("Init ALARM\n");
 
-                sm_coil.release();
+                sm_coil.hold();
                 sm_spool.release();
                 sm_carriage.release();
 
