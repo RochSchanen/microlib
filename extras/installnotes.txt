@@ -1,0 +1,468 @@
+
+// installation on a linux installation (linux mint, user roch schanen)
+
+curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+
+// the installation creates the arduino-cli command in ~/bin/ directory
+// add ~/bin/ to PATH on opening the shell: add to ~/.bashrc file the following lines:
+
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
+
+// on opening the shell, these lines checks for the existence of the directory ~/bin/.
+// if the directory exist, it adds it to the PATH environment variable.
+// start the shell, check that the arduino-cli command is available:
+
+arduino-cli version
+
+// create the ~/Documents/Arduino/ directory
+
+mkdir ~/Documents/Arduino
+
+// change directory:
+
+cd ~/Arduino
+
+// clone repo
+
+git@github.com:RochSchanen/microlib.git
+
+// before compiling
+
+arduino-cli board list
+
+// the cli downloads the necessary packages:
+
+Downloading index: library_index.tar.bz2 downloaded                                                                                                   
+Downloading index: package_index.tar.bz2 downloaded                                                                                                   
+Downloading missing tool builtin:ctags@5.8-arduino11...
+builtin:ctags@5.8-arduino11 downloaded                                                                                                                
+Installing builtin:ctags@5.8-arduino11...
+Skipping tool configuration....
+builtin:ctags@5.8-arduino11 installed
+Downloading missing tool builtin:serial-discovery@1.4.0...
+builtin:serial-discovery@1.4.0 downloaded                                                                                                             
+Installing builtin:serial-discovery@1.4.0...
+Skipping tool configuration....
+builtin:serial-discovery@1.4.0 installed
+Downloading missing tool builtin:mdns-discovery@1.0.9...
+builtin:mdns-discovery@1.0.9 downloaded                                                                                                               
+Installing builtin:mdns-discovery@1.0.9...
+Skipping tool configuration....
+builtin:mdns-discovery@1.0.9 installed
+Downloading missing tool builtin:serial-monitor@0.13.0...
+builtin:serial-monitor@0.13.0 downloaded                                                                                                              
+Installing builtin:serial-monitor@0.13.0...
+Skipping tool configuration....
+builtin:serial-monitor@0.13.0 installed
+Downloading missing tool builtin:dfu-discovery@0.1.2...
+builtin:dfu-discovery@0.1.2 downloaded                                                                                                                
+Installing builtin:dfu-discovery@0.1.2...
+Skipping tool configuration....
+builtin:dfu-discovery@0.1.2 installed
+
+// and displays:
+
+Port         Protocol Type              Board Name                FQBN             Core       
+/dev/ttyACM0 serial   Serial Port (USB) Arduino Mega or Mega 2560 arduino:avr:mega arduino:avr
+
+// make config:
+
+arduino-cli config init
+
+// change directory setting:
+
+arduino-cli config set directories.user /home/roch/Documents/Arduino/
+
+// check config settings:
+
+arduino-cli config dump
+
+// returns:
+
+board_manager:
+  additional_urls: []
+build_cache:
+  compilations_before_purge: 10
+  ttl: 720h0m0s
+daemon:
+  port: "50051"
+directories:
+  data: /home/roch/.arduino15
+  downloads: /home/roch/.arduino15/staging
+  user: /home/roch/Documents/Arduino/
+library:
+  enable_unsafe_install: false
+logging:
+  file: ""
+  format: text
+  level: info
+metrics:
+  addr: :9090
+  enabled: true
+output:
+  no_color: false
+sketch:
+  always_export_binaries: false
+updater:
+  enable_notification: true
+
+// download latest core list
+
+arduino-cli core update-index
+
+// install mega core
+
+arduino-cli core install arduino:megaavr
+
+// displays:
+
+Downloading packages...
+arduino:avr-gcc@7.3.0-atmel3.6.1-arduino5 downloaded                                                                                                  
+arduino:avrdude@6.3.0-arduino17 downloaded                                                                                                            
+arduino:arduinoOTA@1.3.0 downloaded                                                                                                                   
+arduino:megaavr@1.8.8 downloaded                                                                                                                      
+Installing arduino:avr-gcc@7.3.0-atmel3.6.1-arduino5...
+Configuring tool....
+arduino:avr-gcc@7.3.0-atmel3.6.1-arduino5 installed
+Installing arduino:avrdude@6.3.0-arduino17...
+Configuring tool....
+arduino:avrdude@6.3.0-arduino17 installed
+Installing arduino:arduinoOTA@1.3.0...
+Configuring tool....
+arduino:arduinoOTA@1.3.0 installed
+Installing platform arduino:megaavr@1.8.8...
+Configuring platform....
+Platform arduino:megaavr@1.8.8 installed
+
+// install uno core:
+
+arduino-cli core install arduino:avr
+
+// displays
+
+Tool arduino:avrdude@6.3.0-arduino17 already installed
+Tool arduino:arduinoOTA@1.3.0 already installed
+Downloading packages...
+arduino:avr-gcc@7.3.0-atmel3.6.1-arduino7 downloaded                                                                                                  
+arduino:avr@1.8.6 downloaded                                                                                                                          
+Installing arduino:avr-gcc@7.3.0-atmel3.6.1-arduino7...
+Configuring tool....
+arduino:avr-gcc@7.3.0-atmel3.6.1-arduino7 installed
+Installing platform arduino:avr@1.8.6...
+Configuring platform....
+Platform arduino:avr@1.8.6 installed
+
+// list core installed:
+
+arduino-cli core list
+
+// displays:
+
+ID              Installed Latest Name                  
+arduino:avr     1.8.6     1.8.6  Arduino AVR Boards    
+arduino:megaavr 1.8.8     1.8.8  Arduino megaAVR Boards
+
+// list supported hardware:
+
+arduino-cli board listall
+
+// displays:
+
+Board Name                       FQBN                           
+Adafruit Circuit Playground      arduino:avr:circuitplay32u4cat 
+Arduino BT                       arduino:avr:bt                 
+Arduino Duemilanove or Diecimila arduino:avr:diecimila          
+Arduino Esplora                  arduino:avr:esplora            
+Arduino Ethernet                 arduino:avr:ethernet           
+Arduino Fio                      arduino:avr:fio                
+Arduino Gemma                    arduino:avr:gemma              
+Arduino Industrial 101           arduino:avr:chiwawa            
+Arduino Leonardo                 arduino:avr:leonardo           
+Arduino Leonardo ETH             arduino:avr:leonardoeth        
+Arduino Mega ADK                 arduino:avr:megaADK            
+Arduino Mega or Mega 2560        arduino:avr:mega               
+Arduino Micro                    arduino:avr:micro              
+Arduino Mini                     arduino:avr:mini               
+Arduino NG or older              arduino:avr:atmegang           
+Arduino Nano                     arduino:avr:nano               
+Arduino Nano Every               arduino:megaavr:nona4809       
+Arduino Pro or Pro Mini          arduino:avr:pro                
+Arduino Robot Control            arduino:avr:robotControl       
+Arduino Robot Motor              arduino:avr:robotMotor         
+Arduino Uno                      arduino:avr:uno                
+Arduino Uno Mini                 arduino:avr:unomini            
+Arduino Uno WiFi                 arduino:avr:unowifi            
+Arduino Uno WiFi Rev2            arduino:megaavr:uno2018        
+Arduino Yún                      arduino:avr:yun                
+Arduino Yún Mini                 arduino:avr:yunmini            
+LilyPad Arduino                  arduino:avr:lilypad            
+LilyPad Arduino USB              arduino:avr:LilyPadUSB         
+Linino One                       arduino:avr:one                
+
+// the arduino:megaavr not necessary for the arduino mega board.
+// make sketch file:
+
+~/Documents/Arduino/myblink/myblink.ino
+
+// containing;
+
+void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(100);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(900);
+}
+
+// make a new command file:
+
+~/bin/compile
+
+// filled with the text:
+
+arduino-cli compile --fqbn arduino:avr:mega $(find -name *.ino)
+
+// change mode:
+
+chmod u+x ~/bin/compile
+
+// change directory:
+
+cd ~/Documents/Arduino/myblink
+
+// and compile:
+
+compile
+
+// which displays
+
+Sketch uses 1544 bytes (0%) of program storage space. Maximum is 253952 bytes.
+Global variables use 9 bytes (0%) of dynamic memory, leaving 8183 bytes for local variables. Maximum is 8192 bytes.
+
+Used platform Version Path                                                     
+arduino:avr   1.8.6   /home/roch/.arduino15/packages/arduino/hardware/avr/1.8.6
+
+// first successfull compilation
+// try uploading:
+
+arduino-cli upload --port /dev/ttyACM0 --fqbn arduino:avr:mega myblink
+
+// which displays:
+
+avrdude: ser_open(): can't open device "/dev/ttyACM0": Permission denied
+ioctl("TIOCMGET"): Inappropriate ioctl for device
+ioctl("TIOCMGET"): Inappropriate ioctl for device
+
+// send kill signal:
+^C
+
+// check group:
+
+ls -l /dev/ttyACM0
+
+// displays:
+
+crw-rw---- 1 root dialout 166, 0 Jul 27 22:14 /dev/ttyACM0
+
+// I should belong to the "dialout" group to be allowed to use the port.
+// display my groups:
+
+groups
+
+// displays:
+
+roch adm cdrom sudo dip plugdev lpadmin sambashare
+
+// which does not include "dialout".
+// add myself to "dialout" group:
+
+sudo adduser roch dialout
+
+// enter password and  then displays
+
+[sudo] password for roch:                
+Adding user `roch' to group `dialout' ...
+Adding user roch to group dialout
+Done.
+
+// and redisplay groups
+
+groups roch
+
+// displays
+
+roch : roch adm dialout cdrom sudo dip plugdev lpadmin sambashare
+
+// which includes "dialout"
+// however, still cannot upload.
+// sudo chmod g+r /dev/ttyACM0 did not change anything...
+// only sudo chmod a+rw /dev/ttyACM0 successfully changed the access mode:
+
+crw-rw-rw- 1 root dialout 166, 0 Jul 27 23:14 /dev/ttyACM0
+
+// uploading now works from "~/Documents/Arduino":
+
+arduino-cli upload --port /dev/ttyACM0 --fqbn arduino:avr:mega myblink
+
+// add upload command into ~/bin/ directory which contains:
+
+arduino-cli upload --verbose --port /dev/ttyACM0 --fqbn arduino:avr:mega $(find -name *.ino)
+
+// don't forget to change the mode:
+
+chmod u+x ~/bin/upload
+
+// now the upload command works from sketch directory "~/Documents/Arduino/myblink/"
+
+upload
+
+// displays
+
+"/home/roch/.arduino15/packages/arduino/tools/avrdude/6.3.0-arduino17/bin/avrdude" "-C/home/roch/.arduino15/packages/arduino/tools/avrdude/6.3.0-arduino17/etc/avrdude.conf" -v -V -patmega2560 -cwiring "-P/dev/ttyACM0" -b115200 -D "-Uflash:w:/tmp/arduino/sketches/8AF082F7F6E730CED3E94CFD7A718CAC/myblink.ino.hex:i"
+
+avrdude: Version 6.3-20190619
+         Copyright (c) 2000-2005 Brian Dean, http://www.bdmicro.com/
+         Copyright (c) 2007-2014 Joerg Wunsch
+
+         System wide configuration file is "/home/roch/.arduino15/packages/arduino/tools/avrdude/6.3.0-arduino17/etc/avrdude.conf"
+         User configuration file is "/home/roch/.avrduderc"
+         User configuration file does not exist or is not a regular file, skipping
+
+         Using Port                    : /dev/ttyACM0
+         Using Programmer              : wiring
+         Overriding Baud Rate          : 115200
+         AVR Part                      : ATmega2560
+         Chip Erase delay              : 9000 us
+         PAGEL                         : PD7
+         BS2                           : PA0
+         RESET disposition             : dedicated
+         RETRY pulse                   : SCK
+         serial program mode           : yes
+         parallel program mode         : yes
+         Timeout                       : 200
+         StabDelay                     : 100
+         CmdexeDelay                   : 25
+         SyncLoops                     : 32
+         ByteDelay                     : 0
+         PollIndex                     : 3
+         PollValue                     : 0x53
+         Memory Detail                 :
+
+                                  Block Poll               Page                       Polled
+           Memory Type Mode Delay Size  Indx Paged  Size   Size #Pages MinW  MaxW   ReadBack
+           ----------- ---- ----- ----- ---- ------ ------ ---- ------ ----- ----- ---------
+           eeprom        65    10     8    0 no       4096    8      0  9000  9000 0x00 0x00
+           flash         65    10   256    0 yes    262144  256   1024  4500  4500 0x00 0x00
+           lfuse          0     0     0    0 no          1    0      0  9000  9000 0x00 0x00
+           hfuse          0     0     0    0 no          1    0      0  9000  9000 0x00 0x00
+           efuse          0     0     0    0 no          1    0      0  9000  9000 0x00 0x00
+           lock           0     0     0    0 no          1    0      0  9000  9000 0x00 0x00
+           calibration    0     0     0    0 no          1    0      0     0     0 0x00 0x00
+           signature      0     0     0    0 no          3    0      0     0     0 0x00 0x00
+
+         Programmer Type : Wiring
+         Description     : Wiring
+         Programmer Model: AVRISP
+         Hardware Version: 15
+         Firmware Version Master : 2.10
+         Vtarget         : 0.0 V
+         SCK period      : 0.1 us
+
+avrdude: AVR device initialized and ready to accept instructions
+
+Reading | ################################################## | 100% 0.01s
+
+avrdude: Device signature = 0x1e9801 (probably m2560)
+avrdude: reading input file "/tmp/arduino/sketches/8AF082F7F6E730CED3E94CFD7A718CAC/myblink.ino.hex"
+avrdude: writing flash (1544 bytes):
+
+Writing | ################################################## | 100% 0.29s
+
+avrdude: 1544 bytes of flash written
+
+avrdude done.  Thank you.
+
+// now compile the coilwinder code:
+// change directory to ~/Documents/Arduino/libraries/microlib/examples/coilwinder/
+// compile and upload:
+
+> compile
+
+Sketch uses 14816 bytes (5%) of program storage space. Maximum is 253952 bytes.
+Global variables use 789 bytes (9%) of dynamic memory, leaving 7403 bytes for local variables. Maximum is 8192 bytes.
+
+Used library Version Path                                           
+microlib     0.0.1   /home/roch/Documents/Arduino/libraries/microlib
+
+> upload
+
+"/home/roch/.arduino15/packages/arduino/tools/avrdude/6.3.0-arduino17/bin/avrdude" "-C/home/roch/.arduino15/packages/arduino/tools/avrdude/6.3.0-arduino17/etc/avrdude.conf" -v -V -patmega2560 -cwiring "-P/dev/ttyACM0" -b115200 -D "-Uflash:w:/tmp/arduino/sketches/1CFEC4BE24EE49A75F33A302A75A8705/coilwinder.ino.hex:i"
+
+avrdude: Version 6.3-20190619
+         Copyright (c) 2000-2005 Brian Dean, http://www.bdmicro.com/
+         Copyright (c) 2007-2014 Joerg Wunsch
+
+         System wide configuration file is "/home/roch/.arduino15/packages/arduino/tools/avrdude/6.3.0-arduino17/etc/avrdude.conf"
+         User configuration file is "/home/roch/.avrduderc"
+         User configuration file does not exist or is not a regular file, skipping
+
+         Using Port                    : /dev/ttyACM0
+         Using Programmer              : wiring
+         Overriding Baud Rate          : 115200
+         AVR Part                      : ATmega2560
+         Chip Erase delay              : 9000 us
+         PAGEL                         : PD7
+         BS2                           : PA0
+         RESET disposition             : dedicated
+         RETRY pulse                   : SCK
+         serial program mode           : yes
+         parallel program mode         : yes
+         Timeout                       : 200
+         StabDelay                     : 100
+         CmdexeDelay                   : 25
+         SyncLoops                     : 32
+         ByteDelay                     : 0
+         PollIndex                     : 3
+         PollValue                     : 0x53
+         Memory Detail                 :
+
+                                  Block Poll               Page                       Polled
+           Memory Type Mode Delay Size  Indx Paged  Size   Size #Pages MinW  MaxW   ReadBack
+           ----------- ---- ----- ----- ---- ------ ------ ---- ------ ----- ----- ---------
+           eeprom        65    10     8    0 no       4096    8      0  9000  9000 0x00 0x00
+           flash         65    10   256    0 yes    262144  256   1024  4500  4500 0x00 0x00
+           lfuse          0     0     0    0 no          1    0      0  9000  9000 0x00 0x00
+           hfuse          0     0     0    0 no          1    0      0  9000  9000 0x00 0x00
+           efuse          0     0     0    0 no          1    0      0  9000  9000 0x00 0x00
+           lock           0     0     0    0 no          1    0      0  9000  9000 0x00 0x00
+           calibration    0     0     0    0 no          1    0      0     0     0 0x00 0x00
+           signature      0     0     0    0 no          3    0      0     0     0 0x00 0x00
+
+         Programmer Type : Wiring
+         Description     : Wiring
+         Programmer Model: AVRISP
+         Hardware Version: 15
+         Firmware Version Master : 2.10
+         Vtarget         : 0.0 V
+         SCK period      : 0.1 us
+
+avrdude: AVR device initialized and ready to accept instructions
+
+Reading | ################################################## | 100% 0.01s
+
+avrdude: Device signature = 0x1e9801 (probably m2560)
+avrdude: reading input file "/tmp/arduino/sketches/1CFEC4BE24EE49A75F33A302A75A8705/coilwinder.ino.hex"
+avrdude: writing flash (14816 bytes):
+
+Writing | ################################################## | 100% 2.38s
+
+avrdude: 14816 bytes of flash written
+
+avrdude done.  Thank you.
+
+// done

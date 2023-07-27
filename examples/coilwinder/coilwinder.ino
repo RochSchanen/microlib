@@ -207,7 +207,10 @@ int32_t interval_v;     // interval value
 #define SUBSTEPSIZE 2 // push this to the code start
 #define RPM(x)((float)(1000000L * 60 * SUBSTEPSIZE / 16 / 200) / (float)x )
 
-// this requires some cleanup
+// this requires some cleanup: if possible, add an integral to the PID control
+// for the moment, only the proportional is used. x is the step value of the
+// incremental encoder, it varies from -28 to +28. SPOOL returns the absolute
+// value of the roation speed (in time intervals units).
 #define SPOOL_MIN 2
 #define SPOOL_MAX 28
 #define SPOOL(x) (1800.0 * (float)(SPOOL_MAX - SPOOL_MIN) / ((float)abs(x) - (float)SPOOL_MIN))
@@ -284,8 +287,10 @@ void setup() {
                         SM0_PWMB, SM0_INB1, SM0_INB2);
     sm_carriage.setup(  SM1_PWMA, SM1_INA2, SM1_INA1,
                         SM1_PWMB, SM1_INB1, SM1_INB2);
-    //~ sm_coil.setup(      SM2_PWMA, SM2_INA1, SM2_INA2,
-                        //~ SM2_PWMB, SM2_INB1, SM2_INB2);
+
+    // reverse direction of the coil motorby swaping index A and B:
+    // sm_coil.setup(      SM2_PWMA, SM2_INA1, SM2_INA2,
+    //                     SM2_PWMB, SM2_INB1, SM2_INB2);    
     sm_coil.setup(      SM2_PWMB, SM2_INB1, SM2_INB2,
                         SM2_PWMA, SM2_INA1, SM2_INA2);
 
@@ -339,7 +344,7 @@ void setup() {
     dtostrf(WIRE(wire_v), 5, 1, sb_wiresize);
     dtostrf(0.0, 5, 1, sb_rpm);
 
-    // push permanent text to display
+    // push permanent text to display "~" diplays the greek "micro" char
 
     strcpy(sb_tmp," ~m"); dsp.putString(11, 1, sb_tmp);
     while(!dsp.ready()){bus.updt(); dsp.updt();}
@@ -650,6 +655,9 @@ void loop(){
             if(Current_Value < -SPOOL_MIN){
                 interval_v = SPOOL(-Current_Value);
                 sm_spool.reverse();}
+            // changed interval substep sizes from 8 to 1 in
+            // order to smooth the spool rotation:
+            // if(interval_v) sm_spool.interval(interval_v, 8);
             if(interval_v) sm_spool.interval(interval_v, 1);
             else sm_spool.hold();
             ie_spool_v = Current_Value;}}
