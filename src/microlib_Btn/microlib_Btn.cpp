@@ -41,7 +41,7 @@ int16_t microlib_Btn::pressed(void){
 
 int16_t microlib_Btn::released(void){
 	if(r){
-		r = 0; // the call clears the pressed status
+		r = 0; // the call clears the released status
 		return 1;
 	}
 	return 0;
