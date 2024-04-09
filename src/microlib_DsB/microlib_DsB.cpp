@@ -14,22 +14,22 @@ void microlib_DSB::setup(microlib_SSD1306 *display, char *strbuf, uint8_t X, uin
     return;
 }
 
-// when a new class instance is created, it is given a unique id.
-// the ids are incremented by one with each new instanciation of the class
-// an index is run cyclicly through all the ids. when a buffer is not
-// empty and the display is ready for printing, the buffer string is
-// copied to the transfer buffer and the buffer string is cleared and
-// the buffer id is set to test the next display buffer. While a buffer
-// is written, the main loop can modify other existing buffers without
-// clogging the display with outdated text. To modify the buffer display,
-// you only need to fill the display buffer string with the new text.
+// When a new class instance is created, it is given a unique id (j).
+// The ids are incremented by one with each new instanciation.
+// An index (i) is run cyclicly through all the ids (j). When a buffer
+// is not empty and the display is ready for printing, the buffer string
+// is copied to the transfer buffer, the buffer string is cleared, and
+// the buffer index (i) is set to test the next display buffer. While a
+// buffer is written, the main loop can easily modify any buffer string
+// WITHOUT CLOGGING the display with outdated text. To modify the display,
+// you only need to fill the appropriate buffer string with some new text.
 
 void microlib_DSB::updt(void){
-    // current id (i) tested
-    if(j == i){ // "j" is this instance id, compare with running id "i"
+    // compare local id (j) to the running index value (i)
+    if(j == i){ // matching -> check if the buffer needs an update
         if(s[0] > 0){ // check is the buffer is not empty
-            if(d->ready()){ // check is the display is ready for xfer
-                // COPY DISPLAY BUFFER STRING TO XFER BUFFER STRING
+            if(d->ready()){ // check is the display is ready for a transfer
+                // COPY DISPLAY BUFFER STRING TO TRANSFER BUFFER STRING
                 k = 0;
                 while(s[k] > 0){
                     b[k] = s[k];
